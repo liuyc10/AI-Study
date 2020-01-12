@@ -10,7 +10,7 @@ def fitness_fn(ind, score=0):
         for y in range(n + 1, len(ind)):
             if ind[n] == ind[y]:
                 score += 1
-            elif abs(ind[n] - ind[y]) == (n - y):
+            elif abs(ind[n] - ind[y]) == n - y:
                 score += 1
     return score
 
@@ -23,7 +23,6 @@ def generate_new_population(population, weights, size, mutation_rate=0.1):
         ind_y = random_selection(population, weights)
         xy = reproduce(ind_x, ind_y)
         mutated_xy = mutation(xy, dna_set, mutation_rate)
-        # mutated_xy[0] = fitness_fn(mutated_xy)
         new_population.append(mutated_xy)
     return new_population
 

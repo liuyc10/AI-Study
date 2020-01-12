@@ -61,6 +61,9 @@ class SquareMovePuzzleProblem(Problem):
     def h(self, node):
         return sum(s != g for (s, g) in zip(node.state, self.goal))
 
+    def h_reverse(self, node):
+        return sum(s != g for (s, g) in zip(node.state, self.initial))
+
     def print_format(self, input_list):
         formated = []
         for row_index in range(self.size):
