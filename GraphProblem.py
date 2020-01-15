@@ -22,7 +22,6 @@ class GraphProblem(Problem):
         for d in self.graph.graph_dict.values():
             local_min = min(d.values())
             m = min(m, local_min)
-
         return m
 
     def h(self, node):
@@ -31,7 +30,6 @@ class GraphProblem(Problem):
         if locs:
             if type(node) is str:
                 return int(utils.distance(locs[node], locs[self.goal]))
-
             return int(utils.distance(locs[node.state], locs[self.goal]))
         else:
             return utils.inf

@@ -1,6 +1,10 @@
 import random
+from datetime import datetime
 
-import matplotlib.pyplot as plt
+from GraphProblem import GraphProblem
+from RomaniaMap import undirectedGraph
+from Search import astar_search
+import turtle
 
 
 class Individual:
@@ -92,6 +96,17 @@ def update_root(idv):
             update_root(node)
 
 
+def reverse_directions(direction):
+    if direction == 'UP':
+        return 'DOWN'
+    if direction == 'DOWN':
+        return 'UP'
+    if direction == 'LEFT':
+        return 'RIGHT'
+    if direction == 'RIGHT':
+        return 'LEFT'
+
+
 def print_format(tree, row_count, col_count):
     formatted = []
     for row_index in range(row_count):
@@ -102,44 +117,123 @@ def print_format(tree, row_count, col_count):
     return formatted
 
 
-def great_new_maze():
-    size = 100
-    col = 10
-    row = 10
+def great_new_maze(size, col, row):
     start = 0
     end = size - 1
     tree = initial(size, row, col)
-    print(print_format(tree, row, col))
 
-    count = 0
     while tree[start].num != search(tree[end]).num:
         idv_num = random.randint(0, size - 1)
         idv = tree[idv_num]
-        print(idv_num)
+
         action = random.choice(idv.get_possible_connections())
         neighbor_num = idv.get_neighbor(action)
         neighbor = tree[neighbor_num]
-        print(neighbor_num)
-        count += 1
-        print('count:' + str(count))
+
         if search(idv).num == search(neighbor).num:
             continue
         else:
             idv.connected_nodes.append(neighbor)
             neighbor.connected_nodes.append(idv)
+            idv.connected_directions.append(action)
+            neighbor.connected_directions.append(reverse_directions(action))
             union(idv, neighbor)
-        print(print_format(tree, row, col))
-    print(print_format(tree, row, col))
+
+    for idv in tree:
+        if idv.root != 0:
+            action = random.choice(idv.get_possible_connections())
+            neighbor_num = idv.get_neighbor(action)
+            neighbor = tree[neighbor_num]
+
+            if search(idv).num == search(neighbor).num:
+                continue
+            else:
+                idv.connected_nodes.append(neighbor)
+                neighbor.connected_nodes.append(idv)
+                idv.connected_directions.append(action)
+                neighbor.connected_directions.append(reverse_directions(action))
+                union(idv, neighbor)
     return tree
 
 
-def draw(tree):
-    for node in tree:
-        if node.connected_nodes:
-            for con_node in node.connected_nodes:
-                plt.plot()
-        else:
-            plt.plot
+def solution(tree):
+    node = tree[-1]
+    solution_list = [node]
+    while node.parent:
+        solution_list.append(node.parent)
+        node = node.parent
+
+    return solution_list
 
 
-maze = great_new_maze()
+def draw(tree, col_count, row_count, t, height, width):
+    x_0 = -col_count * width / 2
+    y_0 = row_count * height / 2
+    x_1 = col_count * width / 2
+    y_1 = -row_count * height / 2
+    t.speed(0)
+    t.penup()
+    t.goto(x_0, y_0)
+    t.pendown()
+    t.goto(x_1, y_0)
+
+    t.goto(x_1, y_1 + height)
+    t.penup()
+
+    for n in tree:
+        t.setposition(x_0 + n.col * width, y_0 - n.row * height)
+        if 'LEFT' not in n.connected_directions:
+            t.pendown()
+            if n.num == 0:
+                t.penup()
+        t.setposition(x_0 + n.col * width, y_0 - n.row * height - height)
+
+        t.penup()
+        if 'DOWN' not in n.connected_directions:
+            t.pendown()
+            t.setposition(x_0 + n.col * width + width, y_0 - n.row * height - height)
+        t.penup()
+
+    return x_0, y_0
+
+
+start = datetime.now()
+
+row = 10
+col = 10
+size = row * col
+maze = great_new_maze(size, row, col)
+end = datetime.now()
+print('time cost: ' + str(end - start))
+
+maze_graph = dict()
+for node in maze:
+    c = dict()
+    for child_node in node.child:
+        c[str(child_node.num)] = 1
+    maze_graph[str(node.num)] = c
+undirectedGraph_maze = undirectedGraph(maze_graph)
+
+Maze_problem = GraphProblem('0', '99', undirectedGraph_maze)
+
+search_result = astar_search(Maze_problem)
+solution = search_result.solution()
+h = 50
+w = 50
+tl = turtle.Turtle()
+screen = turtle.Screen()
+screen.screensize(col * w, row * h)
+x0, y0 = draw(maze, row, col, tl, h, w)
+solution = solution(maze)
+solution.reverse()
+
+tl.setposition(x0 + w / 2, y0 - h / 2)
+tl.pencolor('red')
+tl.pendown()
+
+for i in range(len(solution) - 1):
+    next_node = solution[i + 1]
+    tl.setposition(x0 + next_node.col * w + w/2, y0 - next_node.row * h - h/2)
+
+tl.penup()
+turtle.done()
