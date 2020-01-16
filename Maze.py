@@ -197,43 +197,50 @@ def draw(tree, col_count, row_count, t, height, width):
     return x_0, y_0
 
 
-start = datetime.now()
-
-row = 10
-col = 10
+row = col = 100
 size = row * col
+start = datetime.now()
 maze = great_new_maze(size, row, col)
 end = datetime.now()
-print('time cost: ' + str(end - start))
+print('create time cost: ' + str(end - start))
 
 maze_graph = dict()
+
 for node in maze:
     c = dict()
-    for child_node in node.child:
-        c[str(child_node.num)] = 1
+    for connected_node in node.connected_nodes:
+        c[str(connected_node.num)] = 1
     maze_graph[str(node.num)] = c
 undirectedGraph_maze = undirectedGraph(maze_graph)
+undirectedGraph_maze.locations = dict()
+for node in maze:
+    undirectedGraph_maze.locations[str(node.num)] = (node.col, node.row)
 
-Maze_problem = GraphProblem('0', '99', undirectedGraph_maze)
+Maze_problem = GraphProblem('0', str(maze[-1].num), undirectedGraph_maze)
 
+start = datetime.now()
 search_result = astar_search(Maze_problem)
+end = datetime.now()
+print('search time cost: ' + str(end - start))
 solution = search_result.solution()
-h = 50
-w = 50
+h = w = 6
 tl = turtle.Turtle()
 screen = turtle.Screen()
 screen.screensize(col * w, row * h)
+screen.tracer(50000)
+tl.hideturtle()
 x0, y0 = draw(maze, row, col, tl, h, w)
-solution = solution(maze)
-solution.reverse()
 
 tl.setposition(x0 + w / 2, y0 - h / 2)
 tl.pencolor('red')
+tl.pensize(2)
 tl.pendown()
-
+screen.tracer(1)
+tl.speed(5)
 for i in range(len(solution) - 1):
-    next_node = solution[i + 1]
-    tl.setposition(x0 + next_node.col * w + w/2, y0 - next_node.row * h - h/2)
-
+    next_node = maze[int(solution[i])]
+    tl.setposition(x0 + next_node.col * w + w / 2, y0 - next_node.row * h - h / 2)
+final_node = maze[-1]
+tl.setposition(x0 + final_node.col * w + w / 2, y0 - final_node.row * h - h / 2)
 tl.penup()
 turtle.done()

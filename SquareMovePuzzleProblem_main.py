@@ -40,11 +40,11 @@ initial = puzzle.initial
 print(puzzle.print_format(puzzle.initial))
 
 start = datetime.now()
-results = bidirectional_bread_first_graph_search(puzzle)
+# results = bidirectional_bread_first_graph_search(puzzle)
 end = datetime.now()
 print('time cost: ' + str(end - start))
 bi_path = []
-
+'''
 if results is not None:
     path_forward = results[0].solution()
     path_backward = results[1].solution()
@@ -60,7 +60,7 @@ if results is not None:
     print(bi_path)
     print(len(bi_path))
 
-
+'''
 start = datetime.now()
 results = astar_search(puzzle1)
 end = datetime.now()

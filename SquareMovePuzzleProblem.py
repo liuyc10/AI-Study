@@ -1,6 +1,17 @@
 from Problem import Problem
 
 
+def check_solvability(state):
+
+    inversion = 0
+    for i in range(len(state)):
+        for j in range(i + 1, len(state)):
+            if (state[i] > state[j]) and state[i] != 0 and state[j] != 0:
+                inversion += 1
+
+    return inversion % 2 == 0
+
+
 class SquareMovePuzzleProblem(Problem):
     def __init__(self, initial, goal):
         super().__init__(initial, goal)
@@ -38,7 +49,7 @@ class SquareMovePuzzleProblem(Problem):
         except IndexError:
             print(blank + neighbor)
         if check:
-            if self.check_solvability(new_state):
+            if check_solvability(new_state):
                 print(new_state)
                 return tuple(new_state)
         else:
@@ -47,16 +58,6 @@ class SquareMovePuzzleProblem(Problem):
             return tuple(new_state)
 
         return None
-
-    def check_solvability(self, state):
-
-        inversion = 0
-        for i in range(len(state)):
-            for j in range(i + 1, len(state)):
-                if (state[i] > state[j]) and state[i] != 0 and state[j] != 0:
-                    inversion += 1
-
-        return inversion % 2 == 0
 
     def h(self, node):
         return sum(s != g for (s, g) in zip(node.state, self.goal))
