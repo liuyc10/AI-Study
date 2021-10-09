@@ -2,7 +2,7 @@ class Game:
     def __init__(self):
         self.initial = None
 
-    def action(self, state):
+    def actions(self, state):
         raise NotImplementedError
 
     def result(self, state, move):

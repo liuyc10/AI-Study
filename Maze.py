@@ -197,7 +197,7 @@ def draw(tree, col_count, row_count, t, height, width):
     return x_0, y_0
 
 
-row = col = 100
+row = col = 20
 size = row * col
 start = datetime.now()
 maze = great_new_maze(size, row, col)
@@ -223,14 +223,14 @@ search_result = astar_search(Maze_problem)
 end = datetime.now()
 print('search time cost: ' + str(end - start))
 solution = search_result.solution()
-h = w = 6
+h = w = 30
 tl = turtle.Turtle()
 screen = turtle.Screen()
 screen.screensize(col * w, row * h)
 screen.tracer(50000)
 tl.hideturtle()
 x0, y0 = draw(maze, row, col, tl, h, w)
-
+'''
 tl.setposition(x0 + w / 2, y0 - h / 2)
 tl.pencolor('red')
 tl.pensize(2)
@@ -243,4 +243,5 @@ for i in range(len(solution) - 1):
 final_node = maze[-1]
 tl.setposition(x0 + final_node.col * w + w / 2, y0 - final_node.row * h - h / 2)
 tl.penup()
+'''
 turtle.done()

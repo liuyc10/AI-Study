@@ -3,7 +3,10 @@ import heapq
 import math
 import random
 
+from gomoku_score_sheet import score_sheet
+
 inf = float('inf')
+delta_xy = [(1, 1), (1, 0), (0, 1), (1, -1)]
 
 
 def distance(a, b):
@@ -126,3 +129,99 @@ def mutation(x, dna, rate):
     m = random.choice(dna)
 
     return x[:c] + [m] + x[c + 1:]
+
+
+def seq_to_score(seq):
+    score = 0
+    for k, v in score_sheet.items():
+        for a, b in v.items():
+            x = list(a)
+            r = [x == seq[i:i + len(x)] for i in range(0, len(seq) - len(x) + 1)]
+
+            if any(r):
+                # print(x)
+                score = score + b
+    return score
+
+
+def get_score(board, move, player):
+    score = 0
+    for (delta_x, delta_y) in delta_xy:
+        x, y = move
+        seq = []
+        for i in range(5):
+            point = board.get((x, y))
+            if point == player:
+                seq.append(1)
+            elif point is None:
+                seq.append(0)
+            else:
+                seq.append(-1)
+                break
+            x = x + delta_x
+            y = y + delta_y
+        seq.reverse()
+        x, y = move
+        seq = seq[0:-1]
+        for i in range(5):
+            point = board.get((x, y))
+            if point == player:
+                seq.append(1)
+            elif point is None:
+                seq.append(0)
+            else:
+                seq.append(-1)
+                break
+            x = x - delta_x
+            y = y - delta_y
+        score = score + seq_to_score(seq)
+    return score
+
+
+def k_in_row(board, move, player, delta_x_y, k=5):
+    (delta_x, delta_y) = delta_x_y
+    x, y = move
+    n = 0  # n is number of moves in row
+    while board.get((x, y)) == player:
+        n += 1
+        x, y = x + delta_x, y + delta_y
+    x, y = move
+    while board.get((x, y)) == player:
+        n += 1
+        x, y = x - delta_x, y - delta_y
+    n -= 1  # Because we counted move itself twice
+    return n >= k
+
+
+def compute_utility(board, move, player):
+    if (k_in_row(board, move, player, (0, 1)) or
+            k_in_row(board, move, player, (1, 0)) or
+            k_in_row(board, move, player, (1, -1)) or
+            k_in_row(board, move, player, (1, 1))):
+        return 100000
+
+        # return +100000 if player == 'X' else -100000
+    else:
+        score = get_score(board, move, player)
+        return score
+        # return score if player == 'X' else -score
+
+
+def extend_moves(move, moves, in_6_step):
+    x_0, y_0 = move
+    for key in moves.keys():
+        if moves[key] == 1:
+            continue
+        (x, y) = key
+        if in_6_step:
+            offset = 1
+        else:
+            offset = 2
+        if abs(x - x_0) <= offset and abs(y - y_0) <= offset:
+            moves[key] = 1
+
+    return moves
+
+
+def ucb(n, C=1.4):
+    return inf if n.N == 0 else n.U / n.N + C * math.sqrt(math.log(n.parent.N) / n.N)

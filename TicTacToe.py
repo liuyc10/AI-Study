@@ -15,7 +15,7 @@ class TicTacToe(Game):
         moves = [(x, y) for x in range(1, h + 1) for y in range(1, v + 1)]
         self.initial = GameState(to_move='X', utility=0, board={}, moves=moves)
 
-    def action(self, state):
+    def actions(self, state):
         return state.moves
 
     def result(self, state, move):
@@ -30,6 +30,9 @@ class TicTacToe(Game):
                          board=board, moves=moves)
 
     def utility(self, state, player):
+        return state.utility if player == 'X' else -state.utility
+
+    def terminal_test(self, state):
         return state.utility != 0 or len(state.moves) == 0
 
     def display(self, state):
@@ -44,7 +47,7 @@ class TicTacToe(Game):
                 self.k_in_row(board, move, player, (1, 0)) or
                 self.k_in_row(board, move, player, (1, -1)) or
                 self.k_in_row(board, move, player, (1, 1))):
-            return +5 if player == 'X' else -5
+            return +1 if player == 'X' else -1
         else:
             return 0
 
