@@ -5,7 +5,7 @@ class Problem:
         self.forward_goal = [goal]
         self.backward_goal = [initial]
 
-    def actions(self, action):
+    def actions(self, state):
         raise NotImplementedError
 
     def result(self, state, action):

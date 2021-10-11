@@ -1,7 +1,6 @@
 import copy
 import turtle
 from random import choice
-
 from Gomoku import Gomoku, GameState
 from Search import alphabeta_cutoff_search, monte_carlo_tree_search
 from utils import extend_moves, compute_utility
