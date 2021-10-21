@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Problem:
     def __init__(self, initial, goal=None):
         self.initial = initial
@@ -20,23 +23,23 @@ class Problem:
 
     def goal_test_forward(self, state):
         if isinstance(self.forward_goal, list):
-            re = []
+            '''re = []
             for x in self.forward_goal:
                 re.append(state == x)
-            return any(re)
-            # return any(state is x for x in self.forward_goal)
+            return any(re)'''
+            return any(state is x for x in self.forward_goal)
             # return is_in(state, self.goal)
         else:
             return state == self.forward_goal
 
     def goal_test_backward(self, state):
         if isinstance(self.backward_goal, list):
-            re = []
+            '''re = []
             for x in self.backward_goal:
                 re.append(state == x)
             return any(re)
-
-            # return any(state is x for x in self.backward_goal)
+'''
+            return any(state is x for x in self.backward_goal)
             # return is_in(state, self.goal)
         else:
             return state == self.backward_goal

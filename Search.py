@@ -1,5 +1,8 @@
+import datetime
 import random
 from collections import deque
+
+from numpy import ndarray
 
 from MCT_Node import MCT_Node
 from Node import Node
@@ -41,11 +44,12 @@ def breadth_first_graph_search(problem):
 
     while frontier:
         node = frontier.popleft()
-        print(node.state)
+        # print(node.state)
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)
-
+        if len(explored) % 1000 == 0:
+            print(len(explored))
         for child in node.expand(problem):
             if child.state not in explored and child not in frontier:
                 frontier.append(child)
@@ -77,45 +81,88 @@ def bidirectional_bread_first_graph_search(problem):
     node_backward = Node(problem.goal)
     frontier_forward = deque()
     frontier_backward = deque()
+    frontier_forward_set = set()
+    frontier_backward_set = set()
     frontier_forward.append(node_forward)
     frontier_backward.append(node_backward)
+    frontier_forward_set.add(node_forward)
+    frontier_backward_set.add(node_backward)
     explored = set()
+
+    time_cost_filter_explore = datetime.timedelta(0)
+    time_cost_filter_frontier = datetime.timedelta(0)
+    time_cost_goal_test = datetime.timedelta(0)
 
     while frontier_forward and frontier_backward:
         node_forward = frontier_forward.popleft()
         # print(node_forward.state)
+        start = datetime.datetime.now()
         if problem.goal_test_forward(node_forward.state):
-            print('[f]meet point:')
-            print(node_forward.state)
+
+            # print('[f]meet point:')
+            # print(node_forward.state)
             while True:
                 node_backward = frontier_backward.popleft()
                 if node_backward.state == node_forward.state:
                     break
+            print('count:' + str(len(explored)))
+            print('time_cost_filter_explore:' + str(time_cost_filter_explore))
+            print('time_cost_filter_frontier:' + str(time_cost_filter_frontier))
+            print('time_cost_goal_test:' + str(time_cost_goal_test))
             return [node_forward, node_backward]
+        end = datetime.datetime.now()
+        time_cost_goal_test += (end - start)
         explored.add(node_forward.state)
 
         for child in node_forward.expand(problem):
-            if child.state not in explored and child not in frontier_forward:
-                frontier_forward.append(child)
-                problem.backward_goal.append(child.state)
+            start = datetime.datetime.now()
+            if child.state not in explored:  # and child not in frontier_forward:
+                end = datetime.datetime.now()
+                time_cost_filter_explore += (end - start)
+                start = datetime.datetime.now()
+                # if child not in frontier_forward:
+                if child not in frontier_forward_set:
+                    end = datetime.datetime.now()
+                    time_cost_filter_frontier += (end - start)
+                    frontier_forward.append(child)
+                    frontier_forward_set.add(child)
+                    problem.backward_goal.append(child.state)
+                    problem.backward_goal_set.add(child.state)  # 可删除
         problem.backward_goal.remove(node_forward.state)
 
         node_backward = frontier_backward.popleft()
         # print(node_backward.state)
+        start = datetime.datetime.now()
         if problem.goal_test_backward(node_backward.state):
-            print('[b]meet point:')
-            print(node_backward.state)
+            # print('[b]meet point:')
+            # print(node_backward.state)
             while True:
                 node_forward = frontier_forward.popleft()
                 if node_backward.state == node_forward.state:
                     break
+            print('count:' + str(len(explored)))
+            print('time_cost_filter_explore:' + str(time_cost_filter_explore))
+            print('time_cost_filter_frontier:' + str(time_cost_filter_frontier))
+            print('time_cost_goal_test:' + str(time_cost_goal_test))
             return [node_forward, node_backward]
+        end = datetime.datetime.now()
+        time_cost_goal_test += (end - start)
         explored.add(node_backward.state)
         # problem.backward_goal = [problem.initial]
         for child in node_backward.expand(problem):
-            if child.state not in explored and child not in frontier_backward:
-                frontier_backward.append(child)
-                problem.forward_goal.append(child.state)
+            start = datetime.datetime.now()
+            if child.state not in explored:  # and child not in frontier_backward:
+                end = datetime.datetime.now()
+                time_cost_filter_explore += (end - start)
+                start = datetime.datetime.now()
+                # if child not in frontier_backward:
+                if child not in frontier_backward_set:
+                    end = datetime.datetime.now()
+                    time_cost_filter_frontier += (end - start)
+                    frontier_backward.append(child)
+                    frontier_backward_set.add(child)
+                    problem.forward_goal.append(child.state)
+                    problem.forward_goal_set.add(child.state)  # 可删除
         problem.forward_goal.remove(node_backward.state)
 
     return None
